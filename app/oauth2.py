@@ -28,8 +28,8 @@ def create_access_token(data: dict):
 def verify_access_token(token: str, credentials_exception):
     try:
         payload = jwt.decode(token, SECRETE_KEY, algorithms = [ALGORITHM]) # Decode the token
-        id = payload.get("user_id") # Get the ID from the token, payload is a dict
-        
+        id = payload.get("user_id") # Get the ID from the token, payload is a dict, and user_id is what we added when create token
+
         if id is None: # Check if Id exsits
             raise credentials_exception
         
