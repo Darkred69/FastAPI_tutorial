@@ -43,7 +43,7 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass
 
-# Schema for OutPut Post
+# Schema for output Post
 class Post(PostBase):
     id: int
     owner_id: int
