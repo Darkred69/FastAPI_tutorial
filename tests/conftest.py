@@ -66,30 +66,44 @@ def test_user(client):
 
     user = res.json() # Convert the response into a dict
     user['password'] = user_data['password'] # Add password to the return user since our schemas for this don't return password
-    return user # Return a user that we can uses in login
+    return user # Return a user as dict that we can uses in login
 
-# Fixture returns a token for post operations
+
+# Fixture that always create 1 user poppy@gmail.com with password: 123456 for testing other functions involving login
+@pytest.fixture
+def test_user2(client):
+    user_data = {'email':'poppy@gmail.com', 'password': '123456'}
+    res = client.post("/users/", json = user_data) 
+    assert res.status_code == 201
+
+    user = res.json() # Convert the response into a dict
+    user['password'] = user_data['password'] # Add password to the return user since our schemas for this don't return password
+    return user # Return a user as dict that we can uses in login
+
+
+# Fixture returns a token for post operations, this is token for user 1
 @pytest.fixture
 def token(test_user):
     return create_access_token({"user_id": test_user["id"]})
 
-# Fixture that modifies the client with authorization
+# Fixture that modifies the client with authorization, this is authorization for user 1
 @pytest.fixture
 def authorized_client(client, token):
     client.headers = {
         **client.headers,
         "Authorization": f"Bearer {token}"
     }
-    return client
+    return client # Return a TestClient
 
 
 
 # Fixture for creating example posts
 @pytest.fixture
-def test_posts(session, test_user):
+def test_posts(session, test_user, test_user2):
     post_data = [{"title": "Post1", "content": "Content1", "owner_id":test_user['id']}, 
                  {"title": "Post2", "content": "Content2", "owner_id":test_user['id']}, 
-                 {"title": "Post3", "content": "Content3", "owner_id":test_user['id']}]
+                 {"title": "Post3", "content": "Content3", "owner_id":test_user['id']},
+                 {"title": "Post4", "content": "Content4", "owner_id":test_user2['id']}] # post 4 is own by user 2, not user 1
     # Small function the create post 
     def create_post_model(post):
         return models.Post(**post)
@@ -98,4 +112,11 @@ def test_posts(session, test_user):
     posts = list(post_map) # Turn the map into list
     session.add_all(posts)
     session.commit()
-    return session.query(models.Post).all()
+    return session.query(models.Post).all() # Return a SQLalchemy model which can be used as dict in list e.g: test_posts[0].title = "Post1"
+
+# Fixture for create a vote on post 1
+@pytest.fixture()
+def vote_post(session, test_posts, test_user):
+    new_vote = models.Vote(post_id = test_posts[0].id, user_id = test_user["id"]) # Vote on post 1 with user 1
+    session.add(new_vote)
+    session.commit()

@@ -41,4 +41,4 @@ def test_login_user(client, test_user):
 def test_incorrect_login(test_user, client, email, password, status_code):
     res = client.post("/login", data = {'username': email, 'password':password}) # wrong password
     assert res.status_code == status_code
-    # assert res.json().get('detail') == "Invalid Credentials"
+    assert res.json().get('detail') == "Invalid Credentials"
