@@ -1,6 +1,6 @@
 from fastapi import Depends
-from jose import JWTError
-import jwt
+from jose import JWTError,jwt # pip install python-jose
+
 from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
