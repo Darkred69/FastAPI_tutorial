@@ -3,75 +3,110 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 from pydantic.types import conint
 
-# Schema for the request body - Pydantic Model
-# All variables in schema must be the same with in models
+# ------------------------------------------------------------
+# Pydantic Schemas for Data Validation and Serialization
+# Used for request bodies and response models in FastAPI
+# ------------------------------------------------------------
 
-# User schema
+# ------------------------
+# User-Related Schemas
+# ------------------------
+
 class User(BaseModel):
-    email:EmailStr
-    password:str
+    """
+    Schema for user credentials input (e.g., during registration or login).
+    """
+    email: EmailStr
+    password: str
 
-# User create schema for create a user
 class UserCreate(User):
+    """
+    Schema for creating a new user. Inherits from User.
+    """
     pass
 
-# User schema for returning user
 class UserOut(BaseModel):
-    id:int
+    """
+    Schema for user output (e.g., when returning user info).
+    """
+    id: int
     email: EmailStr
     created_at: datetime
 
     class Config:
-        from_attributes = True 
-
-# # User schema for login use in Login function
-# class UserLogin(BaseModel):
-#     email: EmailStr
-#     password: str
+        from_attributes = True  # Enables ORM-to-Pydantic conversion
 
 
+# ------------------------
+# Post-Related Schemas
+# ------------------------
 
-
-# Schema for Post
 class PostBase(BaseModel):
-    title: str # The title of the post
-    content: str # The content of the post
-    published: bool = True # To publish the post or not, default to True
-    # rating: Optional[int] = None # The rating of the post, optional integer, default to None
+    """
+    Base schema for post-related fields shared by other post schemas.
+    """
+    title: str  # Title of the post
+    content: str  # Content/body of the post
+    published: bool = True  # Default to published
 
-# Schema for CreatePost input
 class PostCreate(PostBase):
+    """
+    Schema for creating a new post. Inherits from PostBase.
+    """
     pass
 
-# Schema for output Post
 class Post(PostBase):
+    """
+    Schema for post output including additional fields like ID and owner.
+    """
     id: int
     owner_id: int
     created_at: datetime
-    owner: UserOut
-    # Config for Pydantic to return the data as a dictionary
+    owner: UserOut  # Nested user schema for owner details
+
     class Config:
         from_attributes = True
 
-# Schema for OutPut Post but modify with votes
 class PostOut(BaseModel):
+    """
+    Schema for outputting a post along with its vote count.
+    """
     post: Post
     votes: int
-    # Config for Pydantic to return the data as a dictionary
+
     class Config:
         from_attributes = True
 
-# Schema to input Votes in Vote router
+
+# ------------------------
+# Vote-Related Schemas
+# ------------------------
+
 class Vote(BaseModel):
+    """
+    Schema for voting on posts.
+    
+    Attributes:
+        post_id (int): ID of the post being voted on.
+        dir (int): Direction of the vote, 1 to vote, 0 to unvote.
+    """
     post_id: int
-    dir: conint(le=1) # type: ignore
+    dir: conint(le=1)  # Constraint: vote direction must be 0 or 1
 
 
-# Schema of an expected Token
+# ------------------------
+# Token-Related Schemas
+# ------------------------
+
 class Token(BaseModel):
+    """
+    Schema representing the JWT token returned after successful authentication.
+    """
     access_token: str
     token_type: str
 
-# Schema of TokenData, uses when get user data from token
 class TokenData(BaseModel):
+    """
+    Schema representing token payload data for extracting the user ID.
+    """
     id: Optional[str] = None

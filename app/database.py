@@ -2,40 +2,39 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from .config import settings
-# import psycopg2
-# from psycopg2.extras import RealDictCursor
-# import time
 
-# # Connect to database - RAW SQL
-# while True:
-#     try :
-#         conn = psycopg2.connect(host = 'localhost', database = 'FastAPI', user = 'postgres', password = 'root', cursor_factory=RealDictCursor)
-#         cursor = conn.cursor()
-#         print("Connected to the database")
-#         break
-#     except Exception as e:
-#         print(e)
-#         time.sleep(2)
+# -----------------------------------------
+# Database Configuration using SQLAlchemy
+# -----------------------------------------
 
-# Database config
-username = settings.database_username # Default postgres
-password = settings.database_password # Default root
-ip_host = settings.database_hostname # Default localhost
-port = settings.database_port # Default 5432
-database = settings.database_name # Database name
+# Load database settings from environment variables or .env file
+username = settings.database_username  # Default: "postgres"
+password = settings.database_password  # Default: "root"
+ip_host = settings.database_hostname   # Default: "localhost"
+port = settings.database_port          # Default: "5432"
+database = settings.database_name      # Name of the target database
 
-# SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<ip-address/host>/<database-name>"
+# Construct the SQLAlchemy database URL
+# Format: postgresql://<username>:<password>@<host>:<port>/<database>
 SQLALCHEMY_DATABASE_URL = f"postgresql://{username}:{password}@{ip_host}:{port}/{database}"
+
+# Create a database engine
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
-# Create a session maker
+# Create a configured "SessionLocal" class for database sessions
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create a Base
-Base = declarative_base() # Create a base class
+# Create a base class for declaring ORM models (i.e., tables)
+Base = declarative_base()
 
-# Dependency to get the database
 def get_db():
+    """
+    Dependency that provides a database session.
+
+    Yields:
+        db (Session): SQLAlchemy session object.
+    Ensures that the session is closed after the request is done.
+    """
     db = SessionLocal()
     try:
         yield db
