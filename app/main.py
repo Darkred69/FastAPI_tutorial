@@ -1,4 +1,3 @@
-# Run code on cmd uvicorn app.main:app --reload
 from fastapi import FastAPI
 
 from .routers import post, user, auth, vote # Import post and user routers
