@@ -6,7 +6,7 @@ from .database import engine # import the engine from the database.py
 from .config import settings
 from fastapi.middleware.cors import CORSMiddleware
 
-# models.Base.metadata.create_all(bind=engine) # Create the tables in the database automatically can be remove if have alembic
+models.Base.metadata.create_all(bind=engine) # Create the tables in the database automatically can be remove if have alembic
 # Create a FastAPI Instance
 app = FastAPI()
 

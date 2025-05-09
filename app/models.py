@@ -1,5 +1,7 @@
+import uuid
 from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, String, Integer, text
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 from .database import Base
 
 class Post(Base):
